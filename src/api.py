@@ -8,6 +8,7 @@ print(sys.version)     # full version string
 
 import inference
 
+print("MODEL_LOADED", flush=True)
 app = FastAPI()
 
 class Message(BaseModel):
@@ -31,7 +32,3 @@ async def predict(message: Message):
     # For demonstration, we return a dummy response
     prediction = inference.predict(message.text)
     return {"prediction": label[prediction], "id": prediction}
-
-@app.get("/items/{item_id}")
-async def read_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id, "q": q}

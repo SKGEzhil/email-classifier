@@ -1,10 +1,5 @@
 data
-models/email_classifier.keras
-models/model.keras
-models/model2.keras
-models/model3.keras
-models/model4.keras
-models/model5.keras
+models/
 scripts/check_env.py
 src/test.py
 .gitignore
