@@ -1,0 +1,27 @@
+# .github/workflows/cd.yml
+name: CD
+
+on:
+  workflow_run:
+    workflows: ["CI"]      # <-- only after the “CI” workflow
+    types: [ completed ]   # <-- when it finishes
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          client-id:       ${{ secrets.EMAILCLASSIFIER_AZURE_CLIENT_ID }}
+          tenant-id:       ${{ secrets.EMAILCLASSIFIER_AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.EMAILCLASSIFIER_AZURE_SUBSCRIPTION_ID }}
+
+      - name: Deploy existing image to Container App
+        run: |
+          az containerapp update \
+            --name ${{ secrets.EMAILCLASSIFIER_CONTAINER_APP }} \
+            --resource-group ${{ secrets.EMAILCLASSIFIER_RESOURCE_GROUP }} \
+            --image skgezhil/email-classifier:${{ github.event.workflow_run.head_sha }}
