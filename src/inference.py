@@ -2,8 +2,10 @@ import torch
 import numpy as np
 from sentence_transformers import SentenceTransformer
 from tensorflow.keras.models import load_model
+import os
+MODEL_PATH = os.environ["MODEL_PATH"]
 
-model = load_model('../models/model_v1.keras')
+model = load_model(MODEL_PATH)
 
 def get_embeddings(text: str) -> torch.Tensor:
     """

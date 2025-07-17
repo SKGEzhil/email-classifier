@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Checkout your repo
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Set up Docker Buildx (optional but recommended)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # 3. Log in to Docker Hub
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      # 4. Build the Docker image
+      - name: Build Docker image
+        run: |
+          docker build \
+            --tag skgezhil/email-classifier:${{ github.sha }} \
+            --tag skgezhil/email-classifier:latest \
+            .
+
+      # 5. Run tests inside the freshly-built container
+      - name: Run tests in container
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}/tests:/app/tests" \
+            skgezhil/email-classifier:${{ github.sha }} \
+            pytest /app/tests
+
+      # 6. Push images back to Docker Hub
+      - name: Push Docker image
+        run: |
+          docker push skgezhil/email-classifier:${{ github.sha }}
+          docker push skgezhil/email-classifier:latest

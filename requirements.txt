@@ -8,3 +8,6 @@ PyYAML
 --extra-index-url https://download.pytorch.org/whl/cpu
 torch
 uvicorn
+tensorflow
+tf-keras
+pytest

@@ -6,7 +6,8 @@ import sys
 print(sys.executable)  # path to the Python interpreter
 print(sys.version)     # full version string
 
-import inference
+# import inference
+from . import inference
 
 print("MODEL_LOADED", flush=True)
 app = FastAPI()
