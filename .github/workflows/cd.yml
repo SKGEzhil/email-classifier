@@ -1,6 +1,11 @@
 # .github/workflows/cd.yml
 name: CD
 
+# Grant OIDC token permissions so azure/login@v2 can work
+permissions:
+  id-token: write   # allow the OIDC token exchange
+  contents: read    # allow checkout
+
 on:
   workflow_run:
     workflows: ["CI"]      # <-- only after the “CI” workflow
@@ -9,6 +14,9 @@ on:
 jobs:
   deploy:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    permissions:     # You can also put it here, scoped to this job
+      id-token: write
+      contents: read
     runs-on: ubuntu-latest
 
     steps:
