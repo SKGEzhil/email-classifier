@@ -18,7 +18,8 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }} server
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }} server \
+            --tag skgezhil/email-classifier:latest \
 
       - name: Run tests inside container
         env:
