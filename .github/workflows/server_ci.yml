@@ -39,11 +39,6 @@ jobs:
             ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }} \
             pytest /app/tests --maxfail=1 --disable-warnings -q
 
-  publish:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: success()    # only runs when tests pass
-    steps:
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
