@@ -50,3 +50,42 @@ jobs:
         run: |
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }}
           docker push ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:latest
+
+  push-to-ecr:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_REGION: ap-south-1       # <-- static region in env
+      IMAGE_NAME: email-classifier-server
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}   # <-- use env.AWS_REGION
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Pull image from DockerHub
+        run: |
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Log in to AmazonECR
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Tag and push to AmazonECR
+        run: |
+          ECR_REGISTRY=${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+                     $ECR_REGISTRY/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker tag ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.IMAGE_NAME }}:latest \
+                     $ECR_REGISTRY/${{ env.IMAGE_NAME }}:latest
+          docker push $ECR_REGISTRY/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push $ECR_REGISTRY/${{ env.IMAGE_NAME }}:latest
