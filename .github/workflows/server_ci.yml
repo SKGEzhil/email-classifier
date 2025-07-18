@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-    # only run when files under these paths are modified
     paths:
       - 'server/**'
       - '.github/workflows/server_ci.yml'
@@ -13,13 +12,14 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }} server \
-            --tag skgezhil/email-classifier:latest \
+          docker build \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }} \
+            -t ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:latest \
+            server
 
       - name: Run tests inside container
         env:
