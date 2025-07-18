@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - main
+
+    paths:
+      - 'src/**'
+      - 'Dockerfile'
+      - 'requirements.txt'
+      - 'notebooks/**'
+
   pull_request:
     branches:
       - main
