@@ -23,7 +23,9 @@ else:
 # 3) Build the flow with a redirect URI configured via env
 REDIRECT_URI = os.environ.get("OAUTH2_REDIRECT_URI", "http://127.0.0.1:8001/oauth2callback")
 
-flow = InstalledAppFlow.from_client_config(
+from google_auth_oauthlib.flow import Flow
+
+flow = Flow.from_client_config(
     client_config,
     SCOPES,
     redirect_uri=REDIRECT_URI
