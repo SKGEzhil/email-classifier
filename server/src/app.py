@@ -1,15 +1,8 @@
-import json
 import logging
 import asyncio
-import os
-from contextlib import asynccontextmanager
-from .gmail_client import GmailMonitor
+from gmail_client import GmailMonitor
 from fastapi import FastAPI, Request, HTTPException
-from fastapi.responses import JSONResponse, HTMLResponse
-from google.auth.transport.requests import Request as GoogleRequest
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import InstalledAppFlow
-from .auth import router as auth_router
+from auth import router as auth_router
 
 # Configure logging
 logging.basicConfig(

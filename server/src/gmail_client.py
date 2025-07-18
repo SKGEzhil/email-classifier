@@ -8,7 +8,7 @@ import requests
 import os
 from google.oauth2.credentials import Credentials
 from google.auth.transport.requests import Request as GoogleRequest
-from .auth import SCOPES, TOKEN_PATH
+from auth import SCOPES, TOKEN_PATH
 
 # Prediction endpoint URL from env
 PREDICTION_URL = os.environ.get("EMAIL_CLASSIFIER_URL", 'https://email-classifier.thankfulwater-706eddc2.centralindia.azurecontainerapps.io/predict')

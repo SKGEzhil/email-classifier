@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+    # only run when files under these paths are modified
+    paths:
+      - 'server/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }} server
+
+      - name: Run tests inside container
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS_JSON: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}
+          EMAIL_CLASSIFIER_URL:                ${{ secrets.EMAIL_CLASSIFIER_URL }}
+          OAUTH2_REDIRECT_URI:                 http://127.0.0.1:8001/oauth2callback
+          GOOGLE_CLIENT_CONFIG_PATH:           src/credentials_.json
+          GOOGLE_TOKEN_PATH:                   src/token.json
+        run: |
+          docker run --rm \
+            -w /app \
+            -v "${{ github.workspace }}/server:/app" \
+            -e GOOGLE_APPLICATION_CREDENTIALS_JSON \
+            -e EMAIL_CLASSIFIER_URL \
+            -e OAUTH2_REDIRECT_URI \
+            -e GOOGLE_CLIENT_CONFIG_PATH \
+            -e GOOGLE_TOKEN_PATH \
+            ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }} \
+            pytest /app/tests --maxfail=1 --disable-warnings -q
+
+  publish:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    if: success()    # only runs when tests pass
+    steps:
+      - name: Log in to DockerHub
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN:    ${{ secrets.DOCKERHUB_TOKEN }}
+        run: echo "$DOCKERHUB_TOKEN" | docker login --username "$DOCKERHUB_USERNAME" --password-stdin
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/email-classifier-server:${{ github.sha }}
